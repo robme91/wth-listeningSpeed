@@ -1,0 +1,6 @@
+define Start(mParams){
+  mainWindow <- MakeWindow("grey")
+  Draw()
+
+  WaitForAnyKeyPress()
+}
