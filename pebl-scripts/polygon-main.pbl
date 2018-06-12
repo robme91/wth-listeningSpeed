@@ -1,6 +1,36 @@
-define Start(mParams){
-  mainWindow <- MakeWindow("grey")
+define Start(par){
+  # Define all global colors and fonts etc. first here
+  gHeaderFont <- MakeFont("VeraMono.ttf",0,22, MakeColor("black"), MakeColor("white"),1)
+
+  # Make Window size
+  gVideoWidth <- 800
+  gVideoHeight <- 600
+  #Create Main Window
+  gWindow <- MakeWindow("white")
+  headerLabel <- MakeLabel("Probanden ID Eingabe", gHeaderFont)
+  AddObject(headerLabel, gWindow)
+  MoveCorner(headerLabel, 100, 50)
   Draw()
 
+  items <- []
+  i <- 0
+  while (i <= 9){
+    newlist <- [i, 1+i]
+    PushOnEnd(items, newlist)
+    i <- i + 1
+  }
+
+  loop(item, items){
+    Print("Item: " + item)
+    Print("InnerItem: " + Nth(item, 1))
+  }
+
   WaitForAnyKeyPress()
+}
+
+# TODO find out why no label is shown when this method is called instead of directliy coded above
+define ShowLandingPage(){
+  headerLabel <- MakeLabel("Probanden ID Eingabe", gHeaderFont)
+  AddObject(headerLabel, gWindow)
+  MoveCorner(headerLabel, 100, 50)
 }
