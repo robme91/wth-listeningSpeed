@@ -1,0 +1,31 @@
+headerLabel <- MakeLabel("Probanden ID Eingabe", gHeaderFont)
+AddObject(headerLabel, gWindow)
+MoveCorner(headerLabel, 300, 50)
+subjectIdText <- EasyTextBox("Hier steht ein wirklich
+     langer text über das Experiment und dass du unten die id eintragen sollst.
+      Id eingeben und anschließend mit ENTER bestätigen",
+    200, 150, gWindow, 12, 400, 150)
+subjectIdBox <- EasyTextBox("Hier ID eingeben", 220, 310, gWindow, 12, 200, 30)
+
+# User id input
+WaitForClickOnTarget([subjectIdBox], [1])
+SetText(subjectIdBox, "")
+idInput <- GetInput(subjectIdBox, "<return>")
+Print("Subject ID: " + idInput)
+
+
+
+#### TODO diese listen hier aufräumen, sobald eingebunden in code###
+items <- []
+i <- 0
+while (i <= 9){
+  newlist <- [i, 1+i]
+  PushOnEnd(items, newlist)
+  i <- i + 1
+}
+
+loop(item, items){
+  Print("Item: " + item)
+  Print("InnerItem: " + Nth(item, 1))
+}
+##############################

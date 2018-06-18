@@ -1,36 +1,83 @@
 define Start(par){
   # Define all global colors and fonts etc. first here
-  gHeaderFont <- MakeFont("VeraMono.ttf",0,22, MakeColor("black"), MakeColor("white"),1)
+  gHeaderFont <- MakeFont("VeraMono.ttf",0,22, MakeColor("black"), MakeColor("grey"),1)
+  gTextFont <- MakeFont("VeraMono.ttf",0,13, MakeColor("black"), MakeColor("white"),1)
+  gBtnFont <- MakeFont("VeraMono.ttf",0,15, MakeColor("black"), MakeColor("grey"),1)
 
-  # Make Window size
+  # Create Main Window
   gVideoWidth <- 800
   gVideoHeight <- 600
-  #Create Main Window
   gWindow <- MakeWindow("white")
-  headerLabel <- MakeLabel("Probanden ID Eingabe", gHeaderFont)
-  AddObject(headerLabel, gWindow)
-  MoveCorner(headerLabel, 100, 50)
+  #### TODO mache den Button nicht, einfach sondern mit Hintergrundfarbe
+  nextBtn <- EasyLabel("Weiter",400,400,gWindow, 16)
+  Hide(nextBtn)
   Draw()
 
-  items <- []
-  i <- 0
-  while (i <= 9){
-    newlist <- [i, 1+i]
-    PushOnEnd(items, newlist)
-    i <- i + 1
+  # init experiment
+  gSubNum <- GetSubNum(gWindow)
+  if(not FileExists("output")) {
+    MakeDirectory("output")
   }
+  gFile <- FileOpenWrite("output/userData-" + gSubNum + ".txt")
+  FilePrint_(gFile, "Probandennummer: " + gSubNum)
 
-  loop(item, items){
-    Print("Item: " + item)
-    Print("InnerItem: " + Nth(item, 1))
-  }
+  #Tutorial Page
+  tutorialHeader <- MakeLabel("Tutorial", gHeaderFont)
+  explainationText <- MakeTextBox("Das Experiment läuft wie folgt ab. Ihr müsst dass und das machen, damit" +
+    "dies und jenese passiert. <TODO Hier tutorial beschreibung rein>", gTextFont, 500, 50)
+  AddObject(tutorialHeader, gWindow)
+  AddObject(explainationText, gWindow)
+  MoveCorner(tutorialHeader, 300, 50)
+  Move(explainationText, 150,90)
+  Show(nextBtn)
+  Draw()
 
+  #Example Sentence
+  nextClick <- WaitForClickOnTarget([nextBtn], [1])
+  RemoveObject(explainationText, gWindow)
+  Hide(nextBtn)
+  listenToLabel <-EasyLabel("Drücke eine beliebige Taste um den Beispielsatz zu starten",350 ,250,gWindow, 14)
+  Draw()
   WaitForAnyKeyPress()
+  countDownWin <- StartCountDown()
+  ###TODO hier sound abspielen
+
+  RemoveObject(listenToLabel, gWindow)
+  RemoveCountDown(countDownWin)
+  afterPlayWin <- ShowAfterPlayScreen()
+
+  #Experiment done - close all streams and exit
+  FileClose(gFile)
+  WaitForKeyPress("Q")
 }
 
-# TODO find out why no label is shown when this method is called instead of directliy coded above
-define ShowLandingPage(){
-  headerLabel <- MakeLabel("Probanden ID Eingabe", gHeaderFont)
-  AddObject(headerLabel, gWindow)
-  MoveCorner(headerLabel, 100, 50)
+
+# This method puts a 3-2-1 countdown into the main window and returns that window
+define StartCountDown(){
+  countDownWin <- MakeWindow("white")
+  AddObject(countDownWin, gWindow)
+  CountDown(countDownWin)
+  return countDownWin
+}
+
+# Removes the given countDownWindow from main WIndow
+define RemoveCountDown(countWin){
+  RemoveObject(countWin, gWindow)
+  Draw()
+}
+
+define ShowAfterPlayScreen(){
+  afterPlayWin <- MakeWindow("white")
+  AddObject(afterPlayWin, gWindow)
+  headerLabel <- MakeLabel("Hast du den Satz in dieser Geschwindigkeit verstanden?", gTextFont)
+  understoodLabel <- MakeLabel("Ja, weiter.", gBtnFont)
+  repeatSlowerLabel <- MakeLabel("Nein, bitte langsamer abspielen.", gBtnFont)
+  AddObject(headerLabel, afterPlayWin)
+  AddObject(understoodLabel, afterPlayWin)
+  AddObject(repeatSlowerLabel, afterPlayWin)
+  MoveCorner(headerLabel, 200, 150)
+  MoveCorner(understoodLabel, 150, 400)
+  MoveCorner(repeatSlowerLabel, 350, 400)
+  Draw()
+  return afterPlayWin
 }
