@@ -4,6 +4,10 @@ define Start(par){
   gTextFont <- MakeFont("VeraMono.ttf",0,13, MakeColor("black"), MakeColor("white"),1)
   gBtnFont <- MakeFont("VeraMono.ttf",0,15, MakeColor("black"), MakeColor("grey"),1)
 
+  # Read all audiofiles and init the lists
+  gSentence1_1 <- GetSentences("1_1")
+  #TODO init all other sentences
+
   # Create Main Window
   gVideoWidth <- 800
   gVideoHeight <- 600
@@ -40,8 +44,7 @@ define Start(par){
   Draw()
   WaitForAnyKeyPress()
   countDownWin <- StartCountDown()
-  ###TODO hier sound abspielen
-  Wait(3000) # TODO sobald sounnd abgespielt wird, hier herausnehmen
+  PlayForeground(Nth(gSentence1_1,1))
 
   RemoveObject(listenToLabel, gWindow)
   RemoveCountDown(countDownWin)
@@ -53,6 +56,11 @@ define Start(par){
   }else{
     Print("Weiter gehts mit Kontextfrage bzw. nächstem Satz")
   }
+
+  # Automatismus entwickeln, dass einfach methode aufgerufen wird mit satz id, bzw. der passenen liste
+  # Diese methode schreibt dann jeweiligen satz mit geschwindigkeit und entscheidung des probanden ins file
+  # evtl. durch while oder loop, ganze liste durchlaufen und wenn verstanden, dann break ansonsten wird nächster satz gespielt
+  # aufpassen wegen schnell nach langsam und langsam nach schnell
 
   #Experiment done - close all streams and exit
   FileClose(gFile)
@@ -97,4 +105,18 @@ define ShowAfterPlayScreen(){
   RemoveObject(afterPlayWin, gWindow)
   Draw()
   return click
+}
+
+#Get all soundfiles to the sentence with the given id
+#The setence id is written in the versuchsplan
+define GetSentences(sentenceId){
+  sentences <- []
+  # we start at 100% and increase by 10. we have 14 speeds
+  i <- 100
+  while(i <= 230){
+    sen<- LoadSound("audio/" + sentenceId + "_" + i + ".wav")
+    PushOnEnd(sentences, sen)
+    i <- i + 10
+  }
+  return sentences
 }
