@@ -1,14 +1,19 @@
 define Start(par){
-  # Define all global colors and fonts etc. first here
+  #### Define all global colors and fonts etc. first here
   gHeaderFont <- MakeFont("VeraMono.ttf",0,22, MakeColor("black"), MakeColor("grey"),1)
   gTextFont <- MakeFont("VeraMono.ttf",0,13, MakeColor("black"), MakeColor("white"),1)
   gBtnFont <- MakeFont("VeraMono.ttf",0,15, MakeColor("black"), MakeColor("grey"),1)
 
-  # Read all audiofiles and init the lists
-  gSentence1_1 <- GetSentences("1_1")
+  #### Read all audiofiles and init the lists
   #TODO init all other sentences
+  #TODO put into allSentences also the other direction from fast to slow, search for method to get list in umgekehrter reihenfolge
+  gTutSentence <- []  # put the tutorial sentence NOT in the all sentence list
+  gSentence1_1 <- GetSentences("1_1")
+  gSentence1_2 <- GetSentences("1_2")
+  gSentence2_1 <- GetSentences("2_1")
+  gAllSentences <-[gSentence1_1, gSentence1_2, gSentence2_1]
 
-  # Create Main Window
+  #### Create Main Window
   gVideoWidth <- 800
   gVideoHeight <- 600
   gWindow <- MakeWindow("white")
@@ -17,7 +22,13 @@ define Start(par){
   Hide(nextBtn)
   Draw()
 
-  # init experiment
+  # TODO find good sinus wave 
+  sound <- MakeSineWave(10000, 2000, 1000)
+  PlayBackground(sound)
+  Wait(2000)
+  Stop(sound)
+
+  #### init experiment
   gSubNum <- GetSubNum(gWindow)
   if(not FileExists("output")) {
     MakeDirectory("output")
@@ -25,7 +36,7 @@ define Start(par){
   gFile <- FileOpenWrite("output/userData-" + gSubNum + ".txt")
   FilePrint(gFile, "Probandennummer: " + gSubNum)
 
-  #Tutorial Page
+  #### Tutorial Page
   tutorialHeader <- MakeLabel("Tutorial", gHeaderFont)
   explainationText <- MakeTextBox("Das Experiment läuft wie folgt ab. Ihr müsst dass und das machen, damit" +
     "dies und jenese passiert. <TODO Hier tutorial beschreibung rein>", gTextFont, 500, 50)
@@ -36,15 +47,16 @@ define Start(par){
   Show(nextBtn)
   Draw()
 
-  #Example Sentence
+  #### Example Sentence
   nextClick <- WaitForClickOnTarget([nextBtn], [1])
   RemoveObject(explainationText, gWindow)
+  #RemoveObject(nextBtn, gWindow)
   Hide(nextBtn)
   listenToLabel <-EasyLabel("Drücke eine beliebige Taste um den Beispielsatz zu starten",350 ,250,gWindow, 14)
   Draw()
   WaitForAnyKeyPress()
   countDownWin <- StartCountDown()
-  PlayForeground(Nth(gSentence1_1,1))
+  PlayForeground(First(Nth(gSentence1_1,1)))
 
   RemoveObject(listenToLabel, gWindow)
   RemoveCountDown(countDownWin)
@@ -52,10 +64,41 @@ define Start(par){
   ## todo schreibe Satz identifier, geschwindigkeit und entscheidung des nutzers ins file
   if(afterPlayDesc == 0){
     Print("Spiele satz langsamer")
-    ##
   }else{
     Print("Weiter gehts mit Kontextfrage bzw. nächstem Satz")
   }
+
+  #### End of Tutorial
+  endTutorial <- MakeTextBox("Herzlichen Glückwunsch. Du hast das Tutorial erfolgreich absolviert." +
+      "Um nun mit dem Experiment zu starten, klicke bitte auf Weiter", gTextFont, 500, 50)
+  AddObject(endTutorial, gWindow)
+  Move(endTutorial, 150, 120)
+  Show(nextBtn)
+  Draw(gWindow)   # must be gWindow here, otherwise pebl sucks and shut down
+  nextClick <- WaitForClickOnTarget([nextBtn], [1])
+  RemoveObject(endTutorial, gWindow)
+  RemoveObject(tutorialHeader, gWindow)
+  Hide(nextBtn)
+  Draw(gWindow)
+
+  #### Start Experiment and loop through all sentences
+  loop(senBundle, gAllSentences){
+    ShowPreSentenceScreen()
+    Print("Weiter nach Pre Screen")
+    loop(sentence, senBundle){
+      Wait(500)
+      sound <- MakeSineWave(200, 1000, 4000)
+      PlayBackground(sound)
+      Wait(300)
+      Stop(sound)
+      Wait(500)
+      PlayForeground(First(sentence))
+      afterPlayDesc <- ShowAfterPlayScreen()
+      Print("Gespielt SatzID_Geschwidnigkeit: " + Last(sentence))
+    }
+  }
+  Print("Loops done")
+
 
   # Automatismus entwickeln, dass einfach methode aufgerufen wird mit satz id, bzw. der passenen liste
   # Diese methode schreibt dann jeweiligen satz mit geschwindigkeit und entscheidung des probanden ins file
@@ -65,6 +108,17 @@ define Start(par){
   #Experiment done - close all streams and exit
   FileClose(gFile)
   WaitForKeyPress("Q")
+}
+
+# This method opens a pre setence screen
+define ShowPreSentenceScreen(){
+  preSetenceWin <- MakeWindow("white")
+  AddObject(preSetenceWin, gWindow)
+  listenToLabel <- EasyLabel("Drücke eine beliebige Taste um den nächsten Satzablauf zu starten.",350 ,250,preSetenceWin, 14)
+  Draw(preSetenceWin)
+  WaitForAnyKeyPress()
+  RemoveObject(preSetenceWin, gWindow)
+  Draw(gWindow)
 }
 
 
@@ -79,7 +133,7 @@ define StartCountDown(){
 # Removes the given countDownWindow from main WIndow
 define RemoveCountDown(countWin){
   RemoveObject(countWin, gWindow)
-  Draw()
+  Draw(gWindow)
 }
 
 # This shows an after setence playing screen, with the question if the subject
@@ -99,11 +153,11 @@ define ShowAfterPlayScreen(){
   MoveCorner(headerLabel, 200, 150)
   MoveCorner(understoodLabel, 150, 400)
   MoveCorner(repeatSlowerLabel, 350, 400)
-  Draw()
+  Draw(afterPlayWin)
   click <- WaitForClickOnTarget([understoodLabel, repeatSlowerLabel], [1, 0])
   Print("Click: " + click)
   RemoveObject(afterPlayWin, gWindow)
-  Draw()
+  Draw(gWindow)
   return click
 }
 
@@ -113,9 +167,10 @@ define GetSentences(sentenceId){
   sentences <- []
   # we start at 100% and increase by 10. we have 14 speeds
   i <- 100
-  while(i <= 230){
-    sen<- LoadSound("audio/" + sentenceId + "_" + i + ".wav")
-    PushOnEnd(sentences, sen)
+  while(i <= 120){ #TODO wieder auf 230 setzen
+    fileId <- sentenceId + "_" + i
+    sen<- LoadSound("audio/" + fileId + ".wav")
+    PushOnEnd(sentences, [sen, fileId])
     i <- i + 10
   }
   return sentences
