@@ -5,28 +5,22 @@ define Start(par){
   gBtnFont <- MakeFont("VeraMono.ttf",0,15, MakeColor("black"), MakeColor("grey"),1)
 
   #### Read all audiofiles and init the lists
-  #TODO init all other sentences
-  #TODO put into allSentences also the other direction from fast to slow, search for method to get list in umgekehrter reihenfolge
+  #TODO make tutotial list
   gTutSentence <- []  # put the tutorial sentence NOT in the all sentence list
-  gSentence1_1 <- GetSentences("1_1")
-  gSentence1_2 <- GetSentences("1_2")
-  gSentence2_1 <- GetSentences("2_1")
-  gAllSentences <-[gSentence1_1, gSentence1_2, gSentence2_1]
+
+  gAllSentences <- InitAllAudioList()
 
   #### Create Main Window
   gVideoWidth <- 800
   gVideoHeight <- 600
   gWindow <- MakeWindow("white")
+  gWhiteScreen <- MakeWindow("white")
+  AddObject(gWhiteScreen, gWindow)
+  Hide(gWhiteScreen)
   #### TODO mache den Button nicht, einfach sondern mit Hintergrundfarbe
   nextBtn <- EasyLabel("Weiter",400,400,gWindow, 16)
   Hide(nextBtn)
   Draw()
-
-  # TODO find good sinus wave 
-  sound <- MakeSineWave(10000, 2000, 1000)
-  PlayBackground(sound)
-  Wait(2000)
-  Stop(sound)
 
   #### init experiment
   gSubNum <- GetSubNum(gWindow)
@@ -36,7 +30,8 @@ define Start(par){
   gFile <- FileOpenWrite("output/userData-" + gSubNum + ".txt")
   FilePrint(gFile, "Probandennummer: " + gSubNum)
 
-  #### Tutorial Page
+
+
   tutorialHeader <- MakeLabel("Tutorial", gHeaderFont)
   explainationText <- MakeTextBox("Das Experiment läuft wie folgt ab. Ihr müsst dass und das machen, damit" +
     "dies und jenese passiert. <TODO Hier tutorial beschreibung rein>", gTextFont, 500, 50)
@@ -54,13 +49,13 @@ define Start(par){
   Hide(nextBtn)
   listenToLabel <-EasyLabel("Drücke eine beliebige Taste um den Beispielsatz zu starten",350 ,250,gWindow, 14)
   Draw()
-  WaitForAnyKeyPress()
-  countDownWin <- StartCountDown()
-  PlayForeground(First(Nth(gSentence1_1,1)))
-
   RemoveObject(listenToLabel, gWindow)
-  RemoveCountDown(countDownWin)
+  Hide(tutorialHeader)
+  WaitForAnyKeyPress()
+  ShowListeningScreen()
+  PlayForeground(First(Nth(gSentence1_1,1)))
   afterPlayDesc <- ShowAfterPlayScreen()
+
   ## todo schreibe Satz identifier, geschwindigkeit und entscheidung des nutzers ins file
   if(afterPlayDesc == 0){
     Print("Spiele satz langsamer")
@@ -68,13 +63,14 @@ define Start(par){
     Print("Weiter gehts mit Kontextfrage bzw. nächstem Satz")
   }
 
-  #### End of Tutorial
+  #### End of Tutorial screen
+  Show(tutorialHeader)
   endTutorial <- MakeTextBox("Herzlichen Glückwunsch. Du hast das Tutorial erfolgreich absolviert." +
       "Um nun mit dem Experiment zu starten, klicke bitte auf Weiter", gTextFont, 500, 50)
   AddObject(endTutorial, gWindow)
   Move(endTutorial, 150, 120)
   Show(nextBtn)
-  Draw(gWindow)   # must be gWindow here, otherwise pebl sucks and shut down
+  Draw(gWindow)
   nextClick <- WaitForClickOnTarget([nextBtn], [1])
   RemoveObject(endTutorial, gWindow)
   RemoveObject(tutorialHeader, gWindow)
@@ -85,16 +81,26 @@ define Start(par){
   loop(senBundle, gAllSentences){
     ShowPreSentenceScreen()
     Print("Weiter nach Pre Screen")
-    loop(sentence, senBundle){
-      Wait(500)
-      sound <- MakeSineWave(200, 1000, 4000)
-      PlayBackground(sound)
-      Wait(300)
-      Stop(sound)
-      Wait(500)
+    #FInd out if last element is a context question. if so, cut out the last element and only go through the soundfiles
+    contextQuestion <- Last(senBundle)
+    if(IsString(contextQuestion)){
+      Print("Liste mit Context frage")
+      audioBundle <- SubList(senBundle, 1, Length(senBundle) -1)
+    }else{
+      audioBundle <- senBundle
+    }
+    loop(sentence, audioBundle){
+      ShowListeningScreen()
       PlayForeground(First(sentence))
       afterPlayDesc <- ShowAfterPlayScreen()
-      Print("Gespielt SatzID_Geschwidnigkeit: " + Last(sentence))
+      FilePrint(gFile, "SatzId_Geschwindigkeit: " + Last(sentence) + "; Verstanden(j/n = 0/1): " + afterPlayDesc)
+      # Break if understood and show contextquestion if there is one
+      if(afterPlayDesc == 1){
+        if(IsString(contextQuestion)){
+          Print(contextQuestion)
+        }
+        break
+      }
     }
   }
   Print("Loops done")
@@ -107,6 +113,11 @@ define Start(par){
 
   #Experiment done - close all streams and exit
   FileClose(gFile)
+  experimentDoneBox <- MakeTextBox("Glückwunsch! Du hast das Experiment erfolgreich abgeschlossen! " +
+    "Zum Beenden einfach das Fenster schließen oder 'q' drücken", gTextFont, 500, 50)
+  AddObject(experimentDoneBox, gWindow)
+  Move(experimentDoneBox, 150, 150)
+  Draw(gWindow)
   WaitForKeyPress("Q")
 }
 
@@ -114,6 +125,7 @@ define Start(par){
 define ShowPreSentenceScreen(){
   preSetenceWin <- MakeWindow("white")
   AddObject(preSetenceWin, gWindow)
+  sentSucceedLabel <- EasyLabel("Satz abgeschlossen!",350 ,200,preSetenceWin, 14)
   listenToLabel <- EasyLabel("Drücke eine beliebige Taste um den nächsten Satzablauf zu starten.",350 ,250,preSetenceWin, 14)
   Draw(preSetenceWin)
   WaitForAnyKeyPress()
@@ -121,18 +133,16 @@ define ShowPreSentenceScreen(){
   Draw(gWindow)
 }
 
-
-# This method puts a 3-2-1 countdown into the main window and returns that window
-define StartCountDown(){
-  countDownWin <- MakeWindow("white")
-  AddObject(countDownWin, gWindow)
-  CountDown(countDownWin)
-  return countDownWin
-}
-
-# Removes the given countDownWindow from main WIndow
-define RemoveCountDown(countWin){
-  RemoveObject(countWin, gWindow)
+define ShowListeningScreen(){
+  listeningScreen <- MakeWindow("white")
+  AddObject(listeningScreen, gWindow)
+  Draw(listeningScreen)
+  Wait(500)
+  play <- Circle(380,280,40,MakeColor("green"),1)
+  AddObject(play, listeningScreen)
+  Draw(listeningScreen)
+  Wait(100)
+  RemoveObject(listeningScreen, gWindow)
   Draw(gWindow)
 }
 
@@ -174,4 +184,36 @@ define GetSentences(sentenceId){
     i <- i + 10
   }
   return sentences
+}
+
+# Change the order of the given list, so that the returned list is the sample
+# list but the now from last to first element.
+define ChangeListOrder(changingList){
+  orderedList <- []
+  i <- Length(changingList)
+  while( i >= 1){
+    item <- Nth(changingList, i)
+    PushOnEnd(orderedList, item)
+    i <- i -1
+  }
+  return orderedList
+}
+
+# initializes all audio lists and returns one list including all sublists
+define InitAllAudioList(){
+  #TODO init all other sentences
+  gSentence1_1 <- GetSentences("1_1")
+  gSentence1_1Backward <- ChangeListOrder(gSentence1_1)
+  PushOnEnd(gSentence1_1Backward, "Hauuuuus!??")
+
+  gSentence1_2 <- GetSentences("1_2")
+  gSentence1_2Backward <- ChangeListOrder(gSentence1_2)
+  PushOnEnd(gSentence1_2Backward, "Ist das Haus Grün?")
+
+  gSentence2_1 <- GetSentences("2_1")
+  gSentence2_1Backward <- ChangeListOrder(gSentence2_1)
+  PushOnEnd(gSentence2_1Backward, "Noch ne Frage?????")
+
+  return [gSentence1_1, gSentence2_1Backward, gSentence1_1Backward, gSentence1_2,
+   gSentence1_2Backward, gSentence2_1]
 }
