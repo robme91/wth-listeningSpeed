@@ -84,9 +84,10 @@ define Start(par){
     #FInd out if last element is a context question. if so, cut out the last element and only go through the soundfiles
     contextQuestion <- Last(senBundle)
     if(IsString(contextQuestion)){
-      Print("Liste mit Context frage")
+      FilePrint(gFile, "Folgender Satz von schnell nach langsam: ")
       audioBundle <- SubList(senBundle, 1, Length(senBundle) -1)
     }else{
+      FilePrint(gFile, "Folgender Satz von langsam nach schnell: ")
       audioBundle <- senBundle
     }
     loop(sentence, audioBundle){
@@ -97,11 +98,12 @@ define Start(par){
       # Break if understood and show contextquestion if there is one
       if(afterPlayDesc == 1){
         if(IsString(contextQuestion)){
-          Print(contextQuestion)
+          ShowContextQuestion(contextQuestion)
         }
         break
       }
     }
+    FilePrint(gFile, " ")
   }
   Print("Loops done")
 
@@ -169,6 +171,25 @@ define ShowAfterPlayScreen(){
   RemoveObject(afterPlayWin, gWindow)
   Draw(gWindow)
   return click
+}
+
+# Opens a context question screen and saves the answer to the file
+define ShowContextQuestion(contextQuestion){
+  contextWin <- MakeWindow("white")
+  AddObject(contextWin, gWindow)
+  headerLabel <-  MakeLabel("Kontextfrage", gHeaderFont)
+  contextLabel <- MakeLabel(contextQuestion, gTextFont)
+  #TODO make descion mask here
+  AddObject(headerLabel, contextWin)
+  AddObject(contextLabel, contextWin)
+  MoveCorner(headerLabel, 250, 50)
+  MoveCorner(contextLabel, 200, 150)
+  Draw(contextWin)
+  #answer <- WaitForClickOnTarget([right, wrong], [1, 0])
+  WaitForAnyKeyPress()
+  FilePrint(gFile, contextQuestion + " Antwort: " + "Hier Antwort nach click")
+  RemoveObject(contextWin, gWindow)
+  Draw(gWindow)
 }
 
 #Get all soundfiles to the sentence with the given id
