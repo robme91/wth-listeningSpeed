@@ -14,11 +14,10 @@ define Start(par){
   gVideoWidth <- 800
   gVideoHeight <- 600
   gWindow <- MakeWindow("white")
-  gWhiteScreen <- MakeWindow("white")
-  AddObject(gWhiteScreen, gWindow)
-  Hide(gWhiteScreen)
-  #### TODO mache den Button nicht, einfach sondern mit Hintergrundfarbe
-  nextBtn <- EasyLabel("Weiter",400,400,gWindow, 16)
+
+  nextBtn <- MakeLabel("Weiter", gBtnFont)
+  AddObject(nextBtn, gWindow)
+  Move(nextBtn, 400, 400)
   Hide(nextBtn)
   Draw()
 
@@ -31,8 +30,9 @@ define Start(par){
   FilePrint(gFile, "Probandennummer: " + gSubNum)
 
 
-
+  #Tutorial
   tutorialHeader <- MakeLabel("Tutorial", gHeaderFont)
+  #TODO finish tutorial description
   explainationText <- MakeTextBox("Das Experiment läuft wie folgt ab. Ihr müsst dass und das machen, damit" +
     "dies und jenese passiert. <TODO Hier tutorial beschreibung rein>", gTextFont, 500, 50)
   AddObject(tutorialHeader, gWindow)
@@ -45,7 +45,6 @@ define Start(par){
   #### Example Sentence
   nextClick <- WaitForClickOnTarget([nextBtn], [1])
   RemoveObject(explainationText, gWindow)
-  #RemoveObject(nextBtn, gWindow)
   Hide(nextBtn)
   listenToLabel <-EasyLabel("Drücke eine beliebige Taste um den Beispielsatz zu starten",350 ,250,gWindow, 14)
   Draw()
@@ -56,12 +55,7 @@ define Start(par){
   PlayForeground(First(Nth(gSentence1_1,1)))
   afterPlayDesc <- ShowAfterPlayScreen(0)
 
-  ## todo schreibe Satz identifier, geschwindigkeit und entscheidung des nutzers ins file
-  if(afterPlayDesc == 0){
-    Print("Spiele satz langsamer")
-  }else{
-    Print("Weiter gehts mit Kontextfrage bzw. nächstem Satz")
-  }
+  # todo tutorial richtig loopen wenn sätze da sind
 
   #### End of Tutorial screen
   Show(tutorialHeader)
@@ -111,20 +105,18 @@ define Start(par){
   Print("Loops done")
 
 
-  # Automatismus entwickeln, dass einfach methode aufgerufen wird mit satz id, bzw. der passenen liste
-  # Diese methode schreibt dann jeweiligen satz mit geschwindigkeit und entscheidung des probanden ins file
-  # evtl. durch while oder loop, ganze liste durchlaufen und wenn verstanden, dann break ansonsten wird nächster satz gespielt
-  # aufpassen wegen schnell nach langsam und langsam nach schnell
-
   #Experiment done - close all streams and exit
   FileClose(gFile)
-  experimentDoneBox <- MakeTextBox("Glückwunsch! Du hast das Experiment erfolgreich abgeschlossen! " +
-    "Zum Beenden einfach das Fenster schließen oder 'q' drücken", gTextFont, 500, 50)
+  experimentDoneBox <- MakeTextBox("Glückwunsch!
+  Du hast das Experiment erfolgreich abgeschlossen.
+  Zum Beenden einfach das Fenster schließen oder 'q' drücken.", gTextFont, 500, 50)
   AddObject(experimentDoneBox, gWindow)
   Move(experimentDoneBox, 150, 150)
   Draw(gWindow)
   WaitForKeyPress("Q")
 }
+
+#####################  Functions  ############################
 
 # This method opens a pre setence screen
 define ShowPreSentenceScreen(){
@@ -171,7 +163,7 @@ define ShowAfterPlayScreen(isSlowToFast){
   AddObject(headerLabel, afterPlayWin)
   AddObject(yesLabel, afterPlayWin)
   AddObject(noLabel, afterPlayWin)
-  MoveCorner(headerLabel, 200, 150)
+  MoveCorner(headerLabel, 250, 150)
   MoveCorner(yesLabel, 50, 400)
   MoveCorner(noLabel, 400, 400)
   Draw(afterPlayWin)
