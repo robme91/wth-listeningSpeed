@@ -54,7 +54,7 @@ define Start(par){
   WaitForAnyKeyPress()
   ShowListeningScreen()
   PlayForeground(First(Nth(gSentence1_1,1)))
-  afterPlayDesc <- ShowAfterPlayScreen()
+  afterPlayDesc <- ShowAfterPlayScreen(0)
 
   ## todo schreibe Satz identifier, geschwindigkeit und entscheidung des nutzers ins file
   if(afterPlayDesc == 0){
@@ -80,26 +80,29 @@ define Start(par){
   #### Start Experiment and loop through all sentences
   loop(senBundle, gAllSentences){
     ShowPreSentenceScreen()
-    Print("Weiter nach Pre Screen")
     #FInd out if last element is a context question. if so, cut out the last element and only go through the soundfiles
     contextQuestion <- Last(senBundle)
+    isSlowToFast <- 1
     if(IsString(contextQuestion)){
       FilePrint(gFile, "Folgender Satz von schnell nach langsam: ")
       audioBundle <- SubList(senBundle, 1, Length(senBundle) -1)
+      isSlowToFast <- 0
     }else{
       FilePrint(gFile, "Folgender Satz von langsam nach schnell: ")
       audioBundle <- senBundle
+      isSlowToFast <- 1
     }
     loop(sentence, audioBundle){
       ShowListeningScreen()
       PlayForeground(First(sentence))
-      afterPlayDesc <- ShowAfterPlayScreen()
-      FilePrint(gFile, "SatzId_Geschwindigkeit: " + Last(sentence) + "; Verstanden(j/n = 0/1): " + afterPlayDesc)
+      # afterPlayDesc  0 == no, 1 == yes
+      afterPlayDesc <- ShowAfterPlayScreen(isSlowToFast)
+      FilePrint(gFile, "SatzId_Geschwindigkeit: " + Last(sentence) + "; Verstanden(j/n = 1/0): " + afterPlayDesc)
       # Break if understood and show contextquestion if there is one
-      if(afterPlayDesc == 1){
-        if(IsString(contextQuestion)){
-          ShowContextQuestion(contextQuestion)
-        }
+      if(isSlowToFast == 1 AND afterPlayDesc == 0){
+        break
+      }elseif (isSlowToFast == 0 AND afterPlayDesc == 1){
+        ShowContextQuestion(contextQuestion)
         break
       }
     }
@@ -153,20 +156,26 @@ define ShowListeningScreen(){
 # Returns 0 or 1.
 # If 0, the user pressed button "no, dont understand"
 # if 1, the user pressed button "yes, understood"
-define ShowAfterPlayScreen(){
+define ShowAfterPlayScreen(isSlowToFast){
   afterPlayWin <- MakeWindow("white")
   AddObject(afterPlayWin, gWindow)
-  headerLabel <- MakeLabel("Hast du den Satz in dieser Geschwindigkeit verstanden?", gTextFont)
-  understoodLabel <- MakeLabel("Ja, weiter.", gBtnFont)
-  repeatSlowerLabel <- MakeLabel("Nein, bitte langsamer abspielen.", gBtnFont)
+  if(isSlowToFast == 1){
+    headerLabel <- MakeLabel("Hast du den Satz NOCH verstanden?", gTextFont)
+    yesLabel <- MakeLabel("Ja, bitte schneller abspielen.", gBtnFont)
+    noLabel <- MakeLabel("Nein, jetzt war es zu schnell.", gBtnFont)
+  }else{
+    headerLabel <- MakeLabel("Hast du den Satz SCHON verstanden?", gTextFont)
+    yesLabel <- MakeLabel("Ja, weiter mit der Frage.", gBtnFont)
+    noLabel <- MakeLabel("Nein, bitte langsamer abspielen.", gBtnFont)
+  }
   AddObject(headerLabel, afterPlayWin)
-  AddObject(understoodLabel, afterPlayWin)
-  AddObject(repeatSlowerLabel, afterPlayWin)
+  AddObject(yesLabel, afterPlayWin)
+  AddObject(noLabel, afterPlayWin)
   MoveCorner(headerLabel, 200, 150)
-  MoveCorner(understoodLabel, 150, 400)
-  MoveCorner(repeatSlowerLabel, 350, 400)
+  MoveCorner(yesLabel, 50, 400)
+  MoveCorner(noLabel, 400, 400)
   Draw(afterPlayWin)
-  click <- WaitForClickOnTarget([understoodLabel, repeatSlowerLabel], [1, 0])
+  click <- WaitForClickOnTarget([yesLabel, noLabel], [1, 0])
   Print("Click: " + click)
   RemoveObject(afterPlayWin, gWindow)
   Draw(gWindow)
@@ -179,15 +188,19 @@ define ShowContextQuestion(contextQuestion){
   AddObject(contextWin, gWindow)
   headerLabel <-  MakeLabel("Kontextfrage", gHeaderFont)
   contextLabel <- MakeLabel(contextQuestion, gTextFont)
-  #TODO make descion mask here
+  yesLabel <- MakeLabel("Ja, richtig.", gBtnFont)
+  noLabel <- MakeLabel("Nein, falsch.", gBtnFont)
   AddObject(headerLabel, contextWin)
   AddObject(contextLabel, contextWin)
+  AddObject(yesLabel, contextWin)
+  AddObject(noLabel, contextWin)
   MoveCorner(headerLabel, 250, 50)
   MoveCorner(contextLabel, 200, 150)
+  MoveCorner(yesLabel, 150, 400)
+  MoveCorner(noLabel, 400, 400)
   Draw(contextWin)
-  #answer <- WaitForClickOnTarget([right, wrong], [1, 0])
-  WaitForAnyKeyPress()
-  FilePrint(gFile, contextQuestion + " Antwort: " + "Hier Antwort nach click")
+  answer <- WaitForClickOnTarget([yesLabel, noLabel], [1, 0])
+  FilePrint(gFile, contextQuestion + " Antwort(j/n = 1/0): " + answer)
   RemoveObject(contextWin, gWindow)
   Draw(gWindow)
 }
