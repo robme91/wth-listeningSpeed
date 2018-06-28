@@ -5,9 +5,9 @@ define Start(par){
   gBtnFont <- MakeFont("VeraMono.ttf",0,15, MakeColor("black"), MakeColor("grey"),1)
 
   #### Read all audiofiles and init the lists
-  #TODO make tutotial list
-  gTutSentence <- []  # put the tutorial sentence NOT in the all sentence list
-
+  gTutSentence <- ChangeListOrder([LoadSound("audio/Tutorial_2_100.wav"), LoadSound("audio/Tutorial_2_170.wav"),
+                    LoadSound("audio/Tutorial_2_230.wav")])
+  gTutQuestion <- "Läuft dort ein Elefant?"
   gAllSentences <- InitAllAudioList()
 
   #### Create Main Window
@@ -51,11 +51,19 @@ define Start(par){
   RemoveObject(listenToLabel, gWindow)
   Hide(tutorialHeader)
   WaitForAnyKeyPress()
-  ShowListeningScreen()
-  PlayForeground(First(Nth(gSentence1_1,1)))
-  afterPlayDesc <- ShowAfterPlayScreen(0)
-
-  # todo tutorial richtig loopen wenn sätze da sind
+  # gTutSentence
+  loop(sentence, gTutSentence){
+    ShowListeningScreen()
+    PlayForeground(sentence)
+    # afterPlayDesc  0 == no, 1 == yes
+    afterPlayDesc <- ShowAfterPlayScreen(0)
+    if(afterPlayDesc == 1){
+      break
+    }
+  }
+  FilePrint(gFile, "Tutorial: ")
+  ShowContextQuestion(gTutQuestion)
+  FilePrint(gFile, "")
 
   #### End of Tutorial screen
   Show(tutorialHeader)
@@ -203,7 +211,7 @@ define GetSentences(sentenceId){
   sentences <- []
   # we start at 100% and increase by 10. we have 14 speeds
   i <- 100
-  while(i <= 120){ #TODO wieder auf 230 setzen
+  while(i <= 230){
     fileId <- sentenceId + "_" + i
     sen<- LoadSound("audio/" + fileId + ".wav")
     PushOnEnd(sentences, [sen, fileId])
@@ -227,19 +235,44 @@ define ChangeListOrder(changingList){
 
 # initializes all audio lists and returns one list including all sublists
 define InitAllAudioList(){
-  #TODO init all other sentences
   gSentence1_1 <- GetSentences("1_1")
   gSentence1_1Backward <- ChangeListOrder(gSentence1_1)
-  PushOnEnd(gSentence1_1Backward, "Hauuuuus!??")
+  PushOnEnd(gSentence1_1Backward, "Ist das Haus dunkelblau?")
 
   gSentence1_2 <- GetSentences("1_2")
   gSentence1_2Backward <- ChangeListOrder(gSentence1_2)
-  PushOnEnd(gSentence1_2Backward, "Ist das Haus Grün?")
+  PushOnEnd(gSentence1_2Backward, "Weiche Kekse sind lecker.")
+
+  gSentence1_3 <- GetSentences("1_3")
+  gSentence1_3Backward <- ChangeListOrder(gSentence1_3)
+  PushOnEnd(gSentence1_3Backward, "Pumuckl versteckt Sachen.")
 
   gSentence2_1 <- GetSentences("2_1")
   gSentence2_1Backward <- ChangeListOrder(gSentence2_1)
-  PushOnEnd(gSentence2_1Backward, "Noch ne Frage?????")
+  PushOnEnd(gSentence2_1Backward, "Haben die  Kinder viel Spaß?")
 
-  return [gSentence1_1, gSentence2_1Backward, gSentence1_1Backward, gSentence1_2,
-   gSentence1_2Backward, gSentence2_1]
+  gSentence2_2 <- GetSentences("2_2")
+  gSentence2_2Backward <- ChangeListOrder(gSentence2_2)
+  PushOnEnd(gSentence2_2Backward, "Vertreibt Korn auch Sorgen am Morgen?")
+
+  gSentence2_3 <- GetSentences("2_3")
+  gSentence2_3Backward <- ChangeListOrder(gSentence2_3)
+  PushOnEnd(gSentence2_3Backward, "Der Wind ist ein laues Lüftchen.")
+
+  gSentence3_1 <- GetSentences("3_1")
+  gSentence3_1Backward <- ChangeListOrder(gSentence3_1)
+  PushOnEnd(gSentence3_1Backward, "Das Bier im Eschenbräu schmeckt nicht.")
+
+  gSentence3_2 <- GetSentences("3_2")
+  gSentence3_2Backward <- ChangeListOrder(gSentence3_2)
+  PushOnEnd(gSentence3_2Backward, "Die Beuth möchte Chipkarten einführen.")
+
+  gSentence3_3 <- GetSentences("3_3")
+  gSentence3_3Backward <- ChangeListOrder(gSentence3_3)
+  PushOnEnd(gSentence3_3Backward, "Arbeit und Freizeit in Balance zu bringen ist schwer.")
+
+  return [gSentence1_3Backward, gSentence2_2, gSentence1_2Backward, gSentence3_1Backward,
+   gSentence3_3, gSentence1_1, gSentence2_1Backward, gSentence3_2, gSentence2_3,
+   gSentence1_1Backward, gSentence2_1, gSentence1_2, gSentence3_2Backward, gSentence3_3Backward,
+   gSentence1_3, gSentence2_3Backward, gSentence2_2Backward, gSentence3_1]
 }

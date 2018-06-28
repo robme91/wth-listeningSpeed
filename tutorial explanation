@@ -6,6 +6,8 @@ Bei schneller Geschwindigkeit a) wird getestet, ab welcher Geschwindigkeit du de
 Bei niedriger Geschwindigkeit b) wird getestet, wie lange du den Satz verstehst. 
 Daher wirst du nach dem Hören gefragt, ob du den Satz a) “schon” oder b) “noch” verstanden hast. 
 Klickst du bei a) auf “nein” und bei b) auf “ja”, wird dir der Satz in der a) nächstniedrigeren oder b) nächsthöheren Geschwindigkeit abgespielt.
-Dies wiederholt sich solange, bis du den Satz verstanden hast oder die a) niedrigste oder b) höchste Geschwindigkeit erreicht hast.
-Klickst du auf bei a) auf “ja”, schon verstanden, und bei b) auf “nein”, nicht mehr verstanden, wird dir als nächstes zur Überprüfung eine kontextuelleg ja/nein Frage zu dem zuvor gehörten Satz gestellt.
-Nach dem Beantworten dieser Kontextfrage wird der Ablauf mit dem nächsten Satz wiederholt. 
+Dies wiederholt sich solange, bis du den Satz a) verstanden oder b) nicht mehr verstanden hast oder die a) niedrigste oder b) höchste Geschwindigkeit erreicht hast.
+Klickst du bei a) auf “ja”, schon verstanden, und bei b) auf “nein”, nicht mehr verstanden, wird dir a) als nächstes zur Überprüfung eine kontextuelleg ja/nein Frage zu dem zuvor gehörten Satz gestellt oder b) einfach mit dem nächsten Satz fortgefahren.
+Nach dem Beantworten dieser Kontextfrage wird der Ablauf mit dem nächsten Satz wiederholt.
+Direkt vor dem Abspielen, blinkt auf dem Bildschirm kurz ein grüner Kreis auf. Anschließend wird die Audiodatei abgespielt. 
+Konzentriere dich also besonders auf das Hören sobal du den Kreis aufblinken siehst. 
