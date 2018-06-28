@@ -11,13 +11,13 @@ define Start(par){
   gAllSentences <- InitAllAudioList()
 
   #### Create Main Window
-  gVideoWidth <- 800
-  gVideoHeight <- 600
+  gVideoWidth <- 1000
+  gVideoHeight <- 750
   gWindow <- MakeWindow("white")
 
   nextBtn <- MakeLabel("Weiter", gBtnFont)
   AddObject(nextBtn, gWindow)
-  Move(nextBtn, 400, 400)
+  Move(nextBtn, 500, 650)
   Hide(nextBtn)
   Draw()
 
@@ -33,12 +33,26 @@ define Start(par){
   #Tutorial
   tutorialHeader <- MakeLabel("Tutorial", gHeaderFont)
   #TODO finish tutorial description
-  explainationText <- MakeTextBox("Das Experiment läuft wie folgt ab. Ihr müsst dass und das machen, damit" +
-    "dies und jenese passiert. <TODO Hier tutorial beschreibung rein>", gTextFont, 500, 50)
+  explainationText <- MakeTextBox("Das Experiment läuft wie folgt ab:
+Du drückst beim Start eine beliebe Taste, um loszulegen. Daraufhin erklingt entweder ein Satz in einer
+a) schnellen oder b) niedrigen Geschwindigkeit. Bei schneller Geschwindigkeit a) wird getestet, ab welcher
+Geschwindigkeit du den Satz verstehst. Bei niedriger Geschwindigkeit b) wird getestet, wie lange du den
+Satz verstehst. Daher wirst du nach dem Hören gefragt, ob du den Satz a) “schon” oder b) “noch”
+verstanden hast. Klickst du bei a) auf “nein” und bei b) auf “ja”, wird dir der Satz in der
+a) nächstniedrigeren oder b) nächsthöheren Geschwindigkeit abgespielt. Dies wiederholt sich solange, bis
+du den Satz a) verstanden oder b) nicht mehr verstanden hast oder die a) niedrigste oder b) höchste
+Geschwindigkeit erreicht hast.
+Klickst du bei a) auf “ja”, schon verstanden, und bei b) auf “nein”, nicht mehr verstanden, wird dir a)
+als nächstes zur Überprüfung eine kontextuelleg ja/nein Frage zu dem zuvor gehörten Satz gestellt oder
+b) einfach mit dem nächsten Satz fortgefahren. Nach dem Beantworten dieser Kontextfrage wird der Ablauf
+mit dem nächsten Satz wiederholt.
+Direkt vor dem Abspielen, blinkt auf dem Bildschirm kurz ein grüner Kreis auf. Anschließend wird die
+Audiodatei abgespielt. Konzentriere dich also besonders auf das Hören sobal du den Kreis aufblinken siehst.", gTextFont, 900, 500)
+
   AddObject(tutorialHeader, gWindow)
   AddObject(explainationText, gWindow)
-  MoveCorner(tutorialHeader, 300, 50)
-  Move(explainationText, 150,90)
+  MoveCorner(tutorialHeader, 400, 40)
+  Move(explainationText, 50,90)
   Show(nextBtn)
   Draw()
 
@@ -46,7 +60,7 @@ define Start(par){
   nextClick <- WaitForClickOnTarget([nextBtn], [1])
   RemoveObject(explainationText, gWindow)
   Hide(nextBtn)
-  listenToLabel <-EasyLabel("Drücke eine beliebige Taste um den Beispielsatz zu starten",350 ,250,gWindow, 14)
+  listenToLabel <-EasyLabel("Drücke eine beliebige Taste um den Beispielsatz zu starten",450 ,250,gWindow, 14)
   Draw()
   RemoveObject(listenToLabel, gWindow)
   Hide(tutorialHeader)
@@ -130,8 +144,8 @@ define Start(par){
 define ShowPreSentenceScreen(){
   preSetenceWin <- MakeWindow("white")
   AddObject(preSetenceWin, gWindow)
-  sentSucceedLabel <- EasyLabel("Satz abgeschlossen!",350 ,200,preSetenceWin, 14)
-  listenToLabel <- EasyLabel("Drücke eine beliebige Taste um den nächsten Satzablauf zu starten.",350 ,250,preSetenceWin, 14)
+  sentSucceedLabel <- EasyLabel("Satz abgeschlossen!",500 ,200,preSetenceWin, 14)
+  listenToLabel <- EasyLabel("Drücke eine beliebige Taste um den nächsten Satzablauf zu starten.",480 ,250,preSetenceWin, 14)
   Draw(preSetenceWin)
   WaitForAnyKeyPress()
   RemoveObject(preSetenceWin, gWindow)
@@ -143,7 +157,7 @@ define ShowListeningScreen(){
   AddObject(listeningScreen, gWindow)
   Draw(listeningScreen)
   Wait(500)
-  play <- Circle(380,280,40,MakeColor("green"),1)
+  play <- Circle(480,320,40,MakeColor("green"),1)
   AddObject(play, listeningScreen)
   Draw(listeningScreen)
   Wait(100)
@@ -171,9 +185,9 @@ define ShowAfterPlayScreen(isSlowToFast){
   AddObject(headerLabel, afterPlayWin)
   AddObject(yesLabel, afterPlayWin)
   AddObject(noLabel, afterPlayWin)
-  MoveCorner(headerLabel, 250, 150)
-  MoveCorner(yesLabel, 50, 400)
-  MoveCorner(noLabel, 400, 400)
+  MoveCorner(headerLabel, 300, 150)
+  MoveCorner(yesLabel, 100, 400)
+  MoveCorner(noLabel, 500, 400)
   Draw(afterPlayWin)
   click <- WaitForClickOnTarget([yesLabel, noLabel], [1, 0])
   Print("Click: " + click)
@@ -194,10 +208,10 @@ define ShowContextQuestion(contextQuestion){
   AddObject(contextLabel, contextWin)
   AddObject(yesLabel, contextWin)
   AddObject(noLabel, contextWin)
-  MoveCorner(headerLabel, 250, 50)
-  MoveCorner(contextLabel, 200, 150)
-  MoveCorner(yesLabel, 150, 400)
-  MoveCorner(noLabel, 400, 400)
+  MoveCorner(headerLabel, 350, 50)
+  MoveCorner(contextLabel, 300, 150)
+  MoveCorner(yesLabel, 250, 400)
+  MoveCorner(noLabel, 500, 400)
   Draw(contextWin)
   answer <- WaitForClickOnTarget([yesLabel, noLabel], [1, 0])
   FilePrint(gFile, contextQuestion + " Antwort(j/n = 1/0): " + answer)
