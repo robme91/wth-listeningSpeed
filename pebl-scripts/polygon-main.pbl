@@ -34,7 +34,7 @@ define Start(par){
   tutorialHeader <- MakeLabel("Tutorial", gHeaderFont)
   #TODO finish tutorial description
   explainationText <- MakeTextBox("Das Experiment läuft wie folgt ab:
-Du drückst beim Start eine beliebe Taste, um loszulegen. Daraufhin erklingt entweder ein Satz in einer
+Du drückst beim Start eine beliebige Taste, um loszulegen. Daraufhin erklingt entweder ein Satz in einer
 a) schnellen oder b) niedrigen Geschwindigkeit. Bei schneller Geschwindigkeit a) wird getestet, ab welcher
 Geschwindigkeit du den Satz verstehst. Bei niedriger Geschwindigkeit b) wird getestet, wie lange du den
 Satz verstehst. Daher wirst du nach dem Hören gefragt, ob du den Satz a) “schon” oder b) “noch”
@@ -43,11 +43,12 @@ a) nächstniedrigeren oder b) nächsthöheren Geschwindigkeit abgespielt. Dies w
 du den Satz a) verstanden oder b) nicht mehr verstanden hast oder die a) niedrigste oder b) höchste
 Geschwindigkeit erreicht hast.
 Klickst du bei a) auf “ja”, schon verstanden, und bei b) auf “nein”, nicht mehr verstanden, wird dir a)
-als nächstes zur Überprüfung eine kontextuelleg ja/nein Frage zu dem zuvor gehörten Satz gestellt oder
+als nächstes zur Überprüfung eine kontextuelle ja/nein Frage zu dem zuvor gehörten Satz gestellt oder
 b) einfach mit dem nächsten Satz fortgefahren. Nach dem Beantworten dieser Kontextfrage wird der Ablauf
 mit dem nächsten Satz wiederholt.
 Direkt vor dem Abspielen, blinkt auf dem Bildschirm kurz ein grüner Kreis auf. Anschließend wird die
-Audiodatei abgespielt. Konzentriere dich also besonders auf das Hören sobal du den Kreis aufblinken siehst.", gTextFont, 900, 500)
+Audiodatei abgespielt. Konzentriere dich also besonders auf das Hören sobal du den Kreis aufblinken siehst.
+Alles Verstanden? Dann klicke unten auf Weiter und starte einen Beispielsatz.", gTextFont, 900, 500)
 
   AddObject(tutorialHeader, gWindow)
   AddObject(explainationText, gWindow)
@@ -223,13 +224,13 @@ define ShowContextQuestion(contextQuestion){
 #The setence id is written in the versuchsplan
 define GetSentences(sentenceId){
   sentences <- []
-  # we start at 100% and increase by 10. we have 14 speeds
-  i <- 100
-  while(i <= 230){
+  # we start at 120% and increase by 20
+  i <- 120
+  while(i <= 280){
     fileId <- sentenceId + "_" + i
     sen<- LoadSound("audio/" + fileId + ".wav")
     PushOnEnd(sentences, [sen, fileId])
-    i <- i + 10
+    i <- i + 20
   }
   return sentences
 }
@@ -257,14 +258,6 @@ define InitAllAudioList(){
   gSentence1_2Backward <- ChangeListOrder(gSentence1_2)
   PushOnEnd(gSentence1_2Backward, "Weiche Kekse sind lecker.")
 
-  gSentence1_3 <- GetSentences("1_3")
-  gSentence1_3Backward <- ChangeListOrder(gSentence1_3)
-  PushOnEnd(gSentence1_3Backward, "Pumuckl versteckt Sachen.")
-
-  gSentence2_1 <- GetSentences("2_1")
-  gSentence2_1Backward <- ChangeListOrder(gSentence2_1)
-  PushOnEnd(gSentence2_1Backward, "Haben die  Kinder viel Spaß?")
-
   gSentence2_2 <- GetSentences("2_2")
   gSentence2_2Backward <- ChangeListOrder(gSentence2_2)
   PushOnEnd(gSentence2_2Backward, "Vertreibt Korn auch Sorgen am Morgen?")
@@ -281,12 +274,7 @@ define InitAllAudioList(){
   gSentence3_2Backward <- ChangeListOrder(gSentence3_2)
   PushOnEnd(gSentence3_2Backward, "Die Beuth möchte Chipkarten einführen.")
 
-  gSentence3_3 <- GetSentences("3_3")
-  gSentence3_3Backward <- ChangeListOrder(gSentence3_3)
-  PushOnEnd(gSentence3_3Backward, "Arbeit und Freizeit in Balance zu bringen ist schwer.")
-
-  return [gSentence1_3Backward, gSentence2_2, gSentence1_2Backward, gSentence3_1Backward,
-   gSentence3_3, gSentence1_1, gSentence2_1Backward, gSentence3_2, gSentence2_3,
-   gSentence1_1Backward, gSentence2_1, gSentence1_2, gSentence3_2Backward, gSentence3_3Backward,
-   gSentence1_3, gSentence2_3Backward, gSentence2_2Backward, gSentence3_1]
+  return [gSentence1_2Backward, gSentence2_2, gSentence3_1Backward,
+   gSentence1_1Backward, gSentence1_2, gSentence3_2, gSentence2_3Backward, gSentence3_1,
+   gSentence2_2Backward, gSentence1_1, gSentence2_3, gSentence3_2Backward]
 }
